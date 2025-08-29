@@ -1,0 +1,21 @@
+{
+  "name": "product-management",
+  "version": "0.1.0",
+  "project": {
+    "name": "product"
+  },
+  "contexts": {
+    "products": {
+      "cases": {
+        "GetProduct": {},
+        "FindProduct": {},
+        "CreateProduct": {},
+        "DeleteProduct": {},
+        "UpdateProduct": {},
+        "GetSortedProduct": {}
+      }
+    }
+  }
+}
+
+

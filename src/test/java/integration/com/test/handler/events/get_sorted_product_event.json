@@ -1,0 +1,10 @@
+{
+  "headers": {
+    "Accept": "*/*",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Box-Agent": "HandlerTester/1.32.3"
+  },
+  "httpMethod": "GET",
+  "path": "/gdp/products/sort",
+  "resource": "/gdp/products/sort"
+}
