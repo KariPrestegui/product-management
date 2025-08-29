@@ -1,0 +1,169 @@
+============= TABLES =============
+CREATE DATABASE PRODUCT;
+USE PRODUCT;
+
+
+CREATE TABLE `PRODUCT.TACATPRODUCTSTATUS` (
+  `FIPRODUCTSTATUSID` int NOT NULL AUTO_INCREMENT,
+  `FCCODE` varchar(45) NOT NULL,
+  `FCDESCRIPTION` varchar(250) NOT NULL,
+  `FIACTIVE` tinyint NOT NULL DEFAULT '1',
+  `FDCREATEDAT` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `FDUPDATEDAT` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `FCLASTRECORD` varchar(100) NOT NULL,
+  PRIMARY KEY (`FIPRODUCTSTATUSID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- INSERT
+INSERT INTO PRODUCT.TACATPRODUCTSTATUS
+(FIPRODUCTSTATUSID, FCCODE, FCDESCRIPTION, FIACTIVE, FDCREATEDAT, FDUPDATEDAT, FCLASTRECORD)
+VALUES(1, '1', 'CREATED', 1, '2025-08-29 17:48:24', '2025-08-29 17:48:24', 'SYSTEM');
+INSERT INTO PRODUCT.TACATPRODUCTSTATUS
+(FIPRODUCTSTATUSID, FCCODE, FCDESCRIPTION, FIACTIVE, FDCREATEDAT, FDUPDATEDAT, FCLASTRECORD)
+VALUES(2, '2', 'UPDATED', 1, '2025-08-29 17:48:24', '2025-08-29 17:48:24', 'SYSTEM');
+
+---------
+
+CREATE TABLE `PRODUCT.TAPRODUCT` (
+  `FIPRODUCTID` int NOT NULL AUTO_INCREMENT,
+  `FCNAME` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `FIPRICE` double NOT NULL,
+  `FISTOCK` int NOT NULL,
+  `FISTATUSID` int NOT NULL,
+  `FIACTIVE` tinyint NOT NULL DEFAULT '1',
+  `FDCREATEDAT` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `FDUPDATEDAT` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `FCLASTRECORD` varchar(100) NOT NULL,
+  PRIMARY KEY (`FIPRODUCTID`),
+  KEY `TAPRODUCT_TACATPRODUCTSTATUS_FK` (`FISTATUSID`),
+  CONSTRAINT `TAPRODUCT_TACATPRODUCTSTATUS_FK` FOREIGN KEY (`FISTATUSID`) REFERENCES `TACATPRODUCTSTATUS` (`FIPRODUCTSTATUSID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+
+
+============= STORED PROCEDURES =============
+
+CREATE DEFINER=`usr`@`%` PROCEDURE `PRODUCT`.`GDP_SP_PRODUCT_EXSTS`(
+  												IN p_product_id INT,
+  												OUT p_exists TINYINT)
+BEGIN
+	DECLARE v_exists TINYINT DEFAULT 0;
+	
+    SELECT COUNT(P.FIPRODUCTID) INTO v_exists 
+	FROM PRODUCT.TAPRODUCT P
+	WHERE P.FIPRODUCTID = p_product_id;
+    
+    SET p_exists = v_exists > 0;
+END
+
+-----------
+
+
+CREATE DEFINER=`usr`@`%` PROCEDURE `PRODUCT`.`GDP_SP_PRODUCT_NAME_EXISTS`(
+  												IN p_product_name VARCHAR(100),
+  												OUT p_exists TINYINT)
+BEGIN
+	DECLARE v_exists TINYINT DEFAULT 0;
+	
+    SELECT COUNT(P.FIPRODUCTID) INTO v_exists 
+	FROM PRODUCT.TAPRODUCT P
+	WHERE P.FCNAME = p_product_name;
+    
+    SET p_exists = v_exists > 0;
+END
+
+---------------
+
+
+CREATE DEFINER=`usr`@`%` PROCEDURE `PRODUCT`.`GDP_SP_GET_PRODUCT`()
+BEGIN
+	SELECT  P.FIPRODUCTID AS product_id,
+			P.FCNAME AS product_name,
+			P.FIPRICE AS product_price,
+			P.FISTOCK AS product_stock,
+			P.FISTATUSID AS product_status_id
+    FROM PRODUCT.TAPRODUCT P;
+
+END
+
+
+------------
+
+CREATE DEFINER=`usr`@`%` PROCEDURE `PRODUCT`.`GDP_SP_FIND_PRODUCT_BY_ID`(
+												IN p_product_id INT)
+BEGIN
+	SELECT  P.FIPRODUCTID AS product_id,
+			P.FCNAME AS product_name,
+			P.FIPRICE AS product_price,
+			P.FISTOCK AS product_stock,
+			P.FISTATUSID AS product_status_id
+    FROM PRODUCT.TAPRODUCT P
+    WHERE P.FIPRODUCTID = p_product_id;
+
+END
+
+
+-------------
+
+
+
+CREATE DEFINER=`usr`@`%` PROCEDURE `PRODUCT`.`GDP_SP_UPDATE_PRODUCT`(
+												IN p_product_id INT,
+  												IN p_product_name VARCHAR(100),
+  												IN p_product_price DOUBLE,
+  												IN p_product_stock INT,
+  												IN p_product_status_id INT,
+  												IN p_last_record VARCHAR(100))
+BEGIN
+ UPDATE PRODUCT.TAPRODUCT
+ 	SET FCNAME = p_product_name, 
+ 		FIPRICE = p_product_price, 
+ 		FISTOCK = p_product_stock, 
+ 		FISTATUSID = p_product_status_id,
+ 		FCLASTRECORD = p_last_record
+ WHERE FIPRODUCTID =  p_product_id;
+COMMIT;
+    
+END
+
+
+---------------------
+
+
+CREATE DEFINER=`usr`@`%` PROCEDURE `PRODUCT`.`GDP_SP_INSERT_PRODUCT`(
+  												IN p_product_name VARCHAR(100),
+  												IN p_product_price DOUBLE,
+  												IN p_product_stock INT,
+  												IN p_product_status_id INT,
+  												IN p_last_record VARCHAR(100),
+  												OUT p_product_id INT)
+BEGIN
+    INSERT INTO PRODUCT.TAPRODUCT
+		(FCNAME, 
+		FIPRICE, 
+		FISTOCK, 
+		FISTATUSID, 
+		FCLASTRECORD)
+	VALUES(p_product_name, 
+		p_product_price, 
+		p_product_stock, 
+		p_product_status_id,
+		p_last_record);
+	COMMIT;
+    
+    SET p_product_id = LAST_INSERT_ID();
+END
+
+
+
+---------------------
+
+CREATE DEFINER=`usr`@`%` PROCEDURE `PRODUCT`.`GDP_SP_DELETE_PRODUCT`(
+														IN p_product_id INT)
+BEGIN
+	DELETE FROM PRODUCT.TAPRODUCT
+	WHERE FIPRODUCTID = p_product_id;
+COMMIT;
+
+END
